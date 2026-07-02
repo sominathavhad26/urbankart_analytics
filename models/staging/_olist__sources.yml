@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: olist
+    description: "Raw data source loaded from olist into snowflake"
+
+    database: AE_PROJECTS
+    schema: RAW
+
+    tables:
+      - name: CUSTOMERS 
+        description: "Raw customer records loaded from Olist marketplace. One row per customer."   
+      - name: ORDERS
+        description: "Raw order records loaded from Olist marketplace. One row per order."
+        config:
+          loaded_at_field: _loaded_at
+          freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+      - name: ORDER_ITEMS
+      - name: PRODUCTS 
+      - name: PAYMENTS
+      - name: SELLERS
+      - name: REVIEWS
+      - name: GEOLOCATION
+      - name: PRODUCT_CATEGORY_TRANSLATION
+            

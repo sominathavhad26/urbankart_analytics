@@ -1,0 +1,88 @@
+
+version: 2
+
+models:
+  - name: stg_olist__orders
+    description: "Cleaned, renamed staging view of UrbanKart orders. One row per order."
+    columns:
+      - name: order_id
+        description: "Primary key. Unique identifier for each order."
+        tests:
+          - unique
+          - not_null
+      - name: order_status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['delivered', 'shipped', 'canceled', 'invoiced', 'processing', 'unavailable', 'approved', 'created']
+
+  - name: stg_olist__customers
+    description: "Cleaned, renamed staging view of UrbanKart customers. One row per customer."
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_olist__products
+    description: "Cleaned, renamed staging view of UrbanKart products. One row per product."
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_olist__sellers
+    description: "Cleaned, renamed staging view of UrbanKart sellers. One row per seller."
+    columns:
+      - name: seller_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_olist__order_items
+    description: "Cleaned, renamed staging view of UrbanKart order line items. One row per order item."
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+
+  - name: stg_olist__payments
+    description: "Cleaned, renamed staging view of UrbanKart order payments."
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: payment_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined']
+
+  - name: stg_olist__reviews
+    description: "Cleaned, renamed staging view of UrbanKart customer reviews."
+    columns:
+      - name: review_score
+        tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+
+  - name: stg_olist__geolocation
+    description: "Cleaned, renamed staging view of UrbanKart geolocation data. Note: contains intentional duplicate zip codes (multiple lat/long entries per zip) — no uniqueness test applied by design."
+
+  - name: stg_olist__product_category_translation
+    description: "Cleaned, renamed staging view mapping product category names to English translations."
+    columns:
+      - name: product_category_name
+        tests:
+          - unique
+          - not_null
