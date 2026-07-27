@@ -1,0 +1,79 @@
+
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      SCD Type 1 customer dimension. One row per unique customer.
+      Deduplication via ROW_NUMBER on customer_unique_id.
+    columns:
+      - name: customer_key
+        description: "Surrogate PK — MD5 hash of customer_unique_id."
+        tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        description: "Natural key. One real person = one unique_id."
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_sellers
+    description: "SCD Type 1 seller dimension. SCD2 via snapshot in Phase 6."
+    columns:
+      - name: seller_key
+        description: "Surrogate PK — MD5 hash of seller_id."
+        tests:
+          - unique
+          - not_null
+      - name: seller_id
+        description: "Natural key."
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_products
+    description: >
+      Product dimension with English category names via COALESCE.
+      Falls back to Portuguese if translation missing.
+    columns:
+      - name: product_key
+        description: "Surrogate PK — MD5 hash of product_id."
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_date
+    description: >
+      Date dimension generated via Snowflake GENERATOR function.
+      Range: 2016-01-01 to 2020-12-31. Enables Power BI time intelligence.
+    columns:
+      - name: date_key
+        description: "Surrogate PK — MD5 hash of date_day."
+        tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Calendar date. One row per date."
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_orders
+    description: >
+      Central fact table at order-item grain. Joins all 3 intermediate
+      models + 4 dimensions. Supports Phase 3 Req #1, #3, #5.
+      For order count use COUNT(DISTINCT order_id), not COUNT(*).
+      For GMV use SUM(item_total_value).
+    columns:
+      - name: order_item_key
+        description: "Surrogate PK — composite of order_id + order_item_id."
+        tests:
+          - unique
+          - not_null
+      - name: customer_key
+        description: "FK to dim_customers."
+      - name: item_total_value
+        description: "price + freight_value. GMV building block."
+        tests:
+          - not_null

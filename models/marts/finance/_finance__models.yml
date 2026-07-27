@@ -1,0 +1,27 @@
+
+version: 2
+
+models:
+  - name: fct_reviews
+    description: >
+      Secondary fact table at review grain (one row per review).
+      Separate from fct_orders because grain is different.
+      Supports Phase 3 Req #5 (CX) and #6 (review score validation).
+    columns:
+      - name: review_key
+        description: "Surrogate PK — composite of review_id + order_id."
+        tests:
+          - unique
+          - not_null
+      - name: review_score
+        description: "Customer review score 1-5."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+      - name: is_negative_review
+        description: "TRUE if review_score <= 2."
+      - name: is_late_delivery_negative_review
+        description: >
+          TRUE if review_score <= 2 AND delivery was late.
+          Phase 3 Req #5 — late delivery to bad review correlation.
