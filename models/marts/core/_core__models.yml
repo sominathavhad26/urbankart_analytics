@@ -73,6 +73,11 @@ models:
           - not_null
       - name: customer_key
         description: "FK to dim_customers."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_key
       - name: item_total_value
         description: "price + freight_value. GMV building block."
         tests:

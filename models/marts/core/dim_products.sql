@@ -1,7 +1,7 @@
 
 -- =============================================================
 -- MODEL: dim_products
--- TYPE: Dimension Table (SCD Type 1)
+-- TYPE: Dimension Table (SCD Type 1)   
 -- GRAIN: One row per product (product_id)
 -- PURPOSE: Product attributes + English category names
 -- NOTE: Portuguese → English translation via COALESCE

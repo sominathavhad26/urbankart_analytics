@@ -3,7 +3,9 @@
 -- TYPE: Dimension Table (SCD Type 1 — overwrite, no history)
 -- GRAIN: One row per unique customer (customer_unique_id)
 -- PURPOSE: Customer descriptive attributes for fct_orders join
-
+-- NOTE: customer_unique_id use kiya (not customer_id) kyunki
+--       Olist mein ek customer har order pe naya customer_id
+--       receive karta hai — unique_id = actual person identifier
 -- =============================================================
 
 with customers as (

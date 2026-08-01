@@ -117,9 +117,9 @@ final as (
     -- INNER JOIN se orphan records miss ho sakte hain
 
     left join dim_customers dc
-        on oj.customer_unique_id  = dc.customer_unique_id
+        on oj.customer_unique_id = dc.customer_unique_id 
 
-    left join dim_sellers dshnhjjjn
+    left join dim_sellers ds
         on oj.seller_id = ds.seller_id
 
     left join dim_products dp
