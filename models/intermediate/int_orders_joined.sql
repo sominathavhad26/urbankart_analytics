@@ -19,6 +19,10 @@ order_items as (
     select * from {{ ref('stg_olist__order_items') }}
 ),
 
+customers as (                                          -- ← NAYA ADD KARO
+    select * from {{ ref('stg_olist__customers') }}
+),
+
 products as (
     select * from {{ ref('stg_olist__products') }}
 ),
@@ -42,6 +46,7 @@ joined as (
 
         -- ============ ORDER DETAILS ============
         o.customer_id,
+        cu.customer_unique_id,                           -- ← NAYA ADD KARO
         o.order_status,
         o.ordered_at,           -- renamed in staging (order_purchase_timestamp)
         o.approved_at,
@@ -97,6 +102,9 @@ joined as (
     -- PRODUCT JOIN
     -- LEFT JOIN kyun? Kuch items ka product_id missing ho sakta hai
     -- Data quality issue — silently drop mat karo
+    left join customers cu                               -- ← NAYA JOIN ADD KARO
+        on o.customer_id = cu.customer_id
+
     left join products p
         on oi.product_id = p.product_id
 
@@ -112,4 +120,4 @@ joined as (
         on p.product_category_name = c.product_category_name
 )
 
-select * from joined
+select * from joined 
