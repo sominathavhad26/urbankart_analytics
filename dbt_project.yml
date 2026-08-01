@@ -39,3 +39,11 @@ models:
     intermediate:
       +materialized: ephemeral
       +schema: intermediate 
+
+    marts:
+      +materialized: table
+      core:
+        +schema: marts
+      finance:
+        +schema: marts  
+        
