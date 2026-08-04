@@ -13,8 +13,8 @@
 | Phase 3 | Business Understanding + Requirements | ✅ Complete |
 | Phase 4 | dbt Init + Staging Layer | ✅ Complete |
 | Phase 5A | Intermediate Layer | ✅ Complete |
-| Phase 5B | Marts Layer (Star Schema) | 🔄 In Progress |
-| Phase 6 | Advanced dbt (Incremental, Snapshots, Macros) | ⏳ Planned |
+| Phase 5B | Marts Layer (Star Schema) | ✅ Complete  |
+| Phase 6 | Advanced dbt (Incremental, Snapshots, Macros) | 🔄 In Progress |
 | Phase 7 | CI/CD (GitHub Actions) | ⏳ Planned |
 | Phase 8 | Power BI Dashboard | ⏳ Planned |
 
