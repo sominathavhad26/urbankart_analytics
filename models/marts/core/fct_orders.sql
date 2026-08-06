@@ -14,6 +14,14 @@
 --       For GMV: SUM(item_total_value)
 -- =============================================================
 
+{{
+    config(
+        materialized = 'incremental',
+        unique_key = 'order_item_key',
+        on_schema_change = 'sync_all_columns'
+    )
+}}
+
 with orders_joined as (
     -- Wide model — order + item + product + seller details
     select * from {{ ref('int_orders_joined') }}
@@ -93,7 +101,7 @@ final as (
         -- ============ PAYMENT METRICS ============
         -- From int_order_payments_summary (order grain)
         -- Note: payment values repeat for each item of same order
-        -- Use with COUNT(DISTINCT order_id) to avoid double counting
+        -- Use with COUNT(DISTINCT order_id) to avoid double counting 
         p.total_payment_value,
         p.max_installments,
         p.installment_payment_count,
@@ -110,8 +118,7 @@ final as (
         d.is_seller_sla_breach,
         d.seller_processing_days
 
-    from orders_joined oj
-
+    from orders_joined oj    
     -- ============ DIMENSION JOINS ============
     -- LEFT JOIN everywhere — koi bhi row silently drop nahi hogi
     -- INNER JOIN se orphan records miss ho sakte hain
@@ -137,6 +144,16 @@ final as (
     -- Delivery: order grain pe join
     left join delivery d
         on oj.order_id = d.order_id
+
+            -- Incremental filter: only new orders since last run
+
+    {% if is_incremental() %}
+    where oj.ordered_at >= (
+        select dateadd('day', -3, max(ordered_at))  -- Look-back window of 3 days to catch late-arriving orders
+        from {{ this }}
+    )
+    {% endif %}
+    
 )
 
 select * from final
