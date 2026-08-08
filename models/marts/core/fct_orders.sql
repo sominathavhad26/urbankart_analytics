@@ -12,6 +12,7 @@
 -- NOTE: 1 order + N items = N rows
 --       For order count: COUNT(DISTINCT order_id)
 --       For GMV: SUM(item_total_value)
+-- CHANGE: materialized = 'incremental'
 -- =============================================================
 
 {{
@@ -75,7 +76,7 @@ final as (
         ) }}                            as order_item_key,
 
         -- ============ NATURAL KEYS ============
-        oj.order_id,
+        oj.order_id, 
         oj.order_item_id,
 
         -- ============ FOREIGN KEYS (dimension joins) ============
