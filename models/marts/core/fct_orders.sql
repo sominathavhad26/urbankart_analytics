@@ -12,8 +12,16 @@
 -- NOTE: 1 order + N items = N rows
 --       For order count: COUNT(DISTINCT order_id)
 --       For GMV: SUM(item_total_value)
+-- CHANGE: materialized = 'incremental'
 -- =============================================================
 
+{{
+    config(
+        materialized = 'incremental',
+        unique_key = 'order_item_key',
+        on_schema_change = 'sync_all_columns'
+    )
+}}
 with orders_joined as (
     -- Wide model — order + item + product + seller details
     select * from {{ ref('int_orders_joined') }}
@@ -67,7 +75,7 @@ final as (
         ) }}                            as order_item_key,
 
         -- ============ NATURAL KEYS ============
-        oj.order_id,
+        oj.order_id, 
         oj.order_item_id,
 
         -- ============ FOREIGN KEYS (dimension joins) ============
@@ -137,6 +145,14 @@ final as (
     -- Delivery: order grain pe join
     left join delivery d
         on oj.order_id = d.order_id
+
+    -- ============ INCREMENTAL FILTER — SABSE AAKHIR MEIN ============
+    {% if is_incremental() %}
+    where oj.ordered_at >= (
+        select dateadd('day', -3, max(ordered_at))
+        from {{ this }}
+    )
+    {% endif %}        
 )
 
 select * from final

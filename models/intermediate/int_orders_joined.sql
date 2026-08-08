@@ -99,6 +99,9 @@ joined as (
     left join orders o
         on oi.order_id = o.order_id
 
+    left join customers cu
+        on o.customer_id = cu.customer_id
+
     -- PRODUCT JOIN
     -- LEFT JOIN kyun? Kuch items ka product_id missing ho sakta hai
     -- Data quality issue — silently drop mat karo
