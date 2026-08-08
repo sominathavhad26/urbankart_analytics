@@ -3,18 +3,17 @@
 -- TYPE: Dimension Table (SCD Type 1 — overwrite, no history)
 -- GRAIN: One row per unique customer (customer_unique_id)
 -- PURPOSE: Customer descriptive attributes for fct_orders join
--- NOTE: customer_unique_id use kiya (not customer_id) kyunki
---       Olist mein ek customer har order pe naya customer_id
---       receive karta hai — unique_id = actual person identifier
+-- NOTE: Uses customer_unique_id (not customer_id) because Olist
+--       assigns a new customer_id per order — unique_id is the
+--       actual person-level identifier
 -- =============================================================
 
 with customers as (
     select * from {{ ref('stg_olist__customers') }}
 ),
 
--- Deduplication zaroori hai
--- Ek customer_unique_id ke multiple customer_id ho sakte hain
--- Latest customer_id wala record lo (most recent info)
+-- One customer_unique_id can map to multiple customer_id values;
+-- keep the most recent record per customer.
 deduped as (
     select
         customer_unique_id,

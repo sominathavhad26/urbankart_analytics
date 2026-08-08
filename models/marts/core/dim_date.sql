@@ -3,17 +3,14 @@
 -- MODEL: dim_date
 -- TYPE: Special Dimension (generated, not from source)
 -- GRAIN: One row per calendar date (2016-01-01 to 2020-12-31)
--- PURPOSE: Power BI time intelligence enable karna
---          (YTD, MoM, QoQ, Same Period Last Year)
--- NOTE: Rows SOURCE se nahi aati — Snowflake GENERATOR se
---       programmatically create hoti hain
+-- PURPOSE: Enables Power BI time intelligence
+--          (YTD, MoM, QoQ, same period last year)
+-- NOTE: Rows are not sourced from raw data — generated
+--       programmatically via Snowflake's GENERATOR function
 -- =============================================================
 
 with date_spine as (
-    -- Snowflake GENERATOR function se date series banao
-    -- SEQ4() = 0 se start hone wala sequence
-    -- DATEADD se har row pe ek din add hota hai
-    -- rowcount = 1826 = 5 years (2016-2020) + 1 leap day
+    -- rowcount = 1826 = 5 years (2016-2020), including one leap day
     select
         dateadd(
             day,
@@ -51,7 +48,7 @@ final as (
             then true else false
         end                             as is_weekend,
 
-        -- Formatted labels (Power BI display ke liye)
+        -- Formatted labels for Power BI display
         to_char(date_day, 'YYYY-MM')    as year_month,
         'Q' || quarter(date_day)
             || '-' || year(date_day)    as quarter_label,

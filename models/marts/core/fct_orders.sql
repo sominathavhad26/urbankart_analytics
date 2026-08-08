@@ -1,7 +1,7 @@
 
 -- =============================================================
 -- MODEL: fct_orders
--- TYPE: Fact Table
+-- TYPE: Fact Table (incremental)
 -- GRAIN: One row per ORDER-ITEM (order_id + order_item_id)
 -- PRIMARY KEY: order_item_key (surrogate)
 -- PURPOSE: Central fact table — Finance, Ops, Marketing KPIs
@@ -9,10 +9,9 @@
 --         + int_delivery_performance + all 4 dimensions
 -- BUSINESS REQ: Phase 3 Req #1 (delivery), #3 (payments),
 --               #5 (CX correlation)
--- NOTE: 1 order + N items = N rows
---       For order count: COUNT(DISTINCT order_id)
---       For GMV: SUM(item_total_value)
--- CHANGE: materialized = 'incremental'
+-- NOTE: 1 order + N items = N rows.
+--       For order count use COUNT(DISTINCT order_id).
+--       For GMV use SUM(item_total_value).
 -- =============================================================
 
 {{
@@ -38,7 +37,7 @@ delivery as (
     select * from {{ ref('int_delivery_performance') }}
 ),
 
--- Dimension tables — sirf keys chahiye joining ke liye
+-- Dimensions — only the keys needed for joining
 dim_customers as (
     select
         customer_key,
@@ -69,8 +68,8 @@ dim_date as (
 
 final as (
     select
-        -- ============ SURROGATE PRIMARY KEY ============
-        -- Composite kyunki grain = order_id + order_item_id
+        -- Composite grain (order_id + order_item_id) requires
+        -- a composite surrogate key
         {{ dbt_utils.generate_surrogate_key(
             ['oj.order_id', 'oj.order_item_id']
         ) }}                            as order_item_key,
@@ -100,9 +99,8 @@ final as (
         oj.item_total_value,            -- price + freight (pre-calculated)
 
         -- ============ PAYMENT METRICS ============
-        -- From int_order_payments_summary (order grain)
-        -- Note: payment values repeat for each item of same order
-        -- Use with COUNT(DISTINCT order_id) to avoid double counting 
+        -- Payment values repeat across items of the same order —
+        -- use COUNT(DISTINCT order_id) downstream to avoid double counting 
         p.total_payment_value,
         p.max_installments,
         p.installment_payment_count,
@@ -120,10 +118,8 @@ final as (
         d.seller_processing_days
 
     from orders_joined oj    
-    -- ============ DIMENSION JOINS ============
-    -- LEFT JOIN everywhere — koi bhi row silently drop nahi hogi
-    -- INNER JOIN se orphan records miss ho sakte hain
-
+    -- LEFT JOIN everywhere so no row is silently dropped —
+    -- an INNER JOIN could hide orphan records
     left join dim_customers dc
         on oj.customer_unique_id = dc.customer_unique_id 
 
@@ -133,20 +129,19 @@ final as (
     left join dim_products dp
         on oj.product_id = dp.product_id
 
-    -- Date join — ordered_at ko date level pe cast karo
     left join dim_date dd
         on oj.ordered_at::date = dd.date_day
 
-    -- ============ INTERMEDIATE MODEL JOINS ============
-    -- Payments: order grain pe join (not item grain)
+    -- Payments and delivery are order-grain, joined onto the
+    -- item-grain base table
     left join payments p
         on oj.order_id = p.order_id
 
-    -- Delivery: order grain pe join
     left join delivery d
         on oj.order_id = d.order_id
 
-            -- Incremental filter: only new orders since last run
+    -- Only reprocess orders from the last run onward, with a
+    -- 3-day look-back to catch late-arriving records
 
     {% if is_incremental() %}
     where oj.ordered_at >= (

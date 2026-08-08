@@ -1,4 +1,8 @@
 
+-- PURPOSE: Aggregate payments to order grain (resolves fan-out
+--          before joining into fct_orders)
+-- BUSINESS REQ: Phase 3 Req #3 — payment/installment analysis
+
 with payments as (
     select * from {{ ref('stg_olist__payments') }}
 ),
@@ -25,7 +29,8 @@ aggregated as (
         sum(case when payment_type = 'debit_card'
             then payment_value else 0 end) as debit_card_value,
 
-        -- Count of payment records per order
+        -- One order can have multiple payment records (split
+        -- payments); this counts them for downstream context
         count(*) as payment_record_count  
 
     from payments

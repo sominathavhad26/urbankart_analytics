@@ -3,12 +3,12 @@
 -- MODEL: fct_reviews
 -- TYPE: Fact Table (Secondary)
 -- GRAIN: One row per review (review_id + order_id)
--- PURPOSE: CX domain — review score analysis,
---          late delivery to low rating correlation
+-- PURPOSE: CX domain — review score analysis and late-delivery
+--          to low-rating correlation
 -- BUSINESS REQ: Phase 3 Req #5 (CX analysis), #6 (score validation)
--- NOTE: Separate from fct_orders kyunki grain alag hai
---       fct_orders = order-item, fct_reviews = review per order
---       Merge karne se review data har item pe repeat hoga
+-- NOTE: Kept separate from fct_orders because the grain differs —
+--       fct_orders is order-item level, fct_reviews is per review.
+--       Merging them would duplicate review data across every item.
 -- =============================================================
 
 with reviews as (
@@ -16,9 +16,7 @@ with reviews as (
 ),
 
 delivery as (
-    -- Delivery context join karo — late delivery correlation ke liye
-    -- Phase 3 Req #5: "CX Lead needs to know if late delivery
-    -- links to low review scores"
+   
     select
         order_id,
         delivery_delay_days,
@@ -35,9 +33,8 @@ dim_date as (
 
 final as (
     select
-        -- ============ SURROGATE PRIMARY KEY ============
-        -- Composite kyunki Olist mein duplicate review_id exist
-        -- karte hain (Phase 3 DQ Risk #2)
+        -- Composite key — Olist has duplicate review_id values,
+        -- so order_id is needed to guarantee uniqueness (Phase 3 DQ Risk #2)
         {{ dbt_utils.generate_surrogate_key(
             ['r.review_id', 'r.order_id']
         ) }}                            as review_key,
@@ -62,8 +59,8 @@ final as (
         d.delivery_delay_days,
         d.is_on_time_delivery,
 
-        -- Key insight flag: Phase 3 Req #5
-        -- Late delivery AND negative review — correlation analysis
+        -- Flags orders that were both late and rated poorly —
+        -- core input for the CX/delivery correlation analysis (Req #5)
         case
             when r.review_score <= 2
              and d.is_on_time_delivery = false

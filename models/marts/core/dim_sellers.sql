@@ -4,8 +4,8 @@
 -- TYPE: Dimension Table (SCD Type 1)
 -- GRAIN: One row per seller (seller_id)
 -- PURPOSE: Seller attributes for fct_orders join
--- NOTE: SCD Type 2 (history tracking) Phase 6 mein snapshot
---       se add karenge - Phase 3 Req #2
+-- NOTE: History tracking (SCD Type 2) is handled separately via
+--       the snp_sellers snapshot — Phase 3 Req #2
 -- =============================================================
 
 with sellers as (
