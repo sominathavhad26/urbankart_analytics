@@ -140,14 +140,16 @@ final as (
     left join delivery d
         on oj.order_id = d.order_id
 
+    {% if is_incremental() %}
     -- Only reprocess orders from the last run onward, with a
     -- 3-day look-back to catch late-arriving records
-
-    {% if is_incremental() %}
     where oj.ordered_at >= (
         select dateadd('day', -3, max(ordered_at))  -- Look-back window of 3 days to catch late-arriving orders
         from {{ this }}
     )
+    {% else %}
+    -- On a full refresh, only load data from the defined start date
+    where oj.ordered_at >= '{{ var("start_date") }}'
     {% endif %}
     
 )
