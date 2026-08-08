@@ -105,8 +105,6 @@ joined as (
     -- PRODUCT JOIN
     -- LEFT JOIN kyun? Kuch items ka product_id missing ho sakta hai
     -- Data quality issue — silently drop mat karo
-    left join customers cu                               -- ← NEW
-        on o.customer_id = cu.customer_id
 
     left join products p
         on oi.product_id = p.product_id
