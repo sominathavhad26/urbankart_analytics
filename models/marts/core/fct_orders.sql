@@ -18,7 +18,17 @@
     config(
         materialized = 'incremental',
         unique_key = 'order_item_key',
-        on_schema_change = 'sync_all_columns'
+        on_schema_change = 'sync_all_columns',
+        post_hook = "
+            INSERT INTO AE_PROJECTS.AUDIT.MODEL_RUN_LOG
+            (model_name, run_started_at, run_finished_at, rows_affected, run_by)
+            SELECT
+                '{{ this.name }}',
+                '{{ run_started_at }}'::timestamp,
+                current_timestamp(),
+                (SELECT COUNT(*) FROM {{ this }}),
+                current_user()
+        "
     )
 }}
 
