@@ -22,6 +22,14 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
+seeds:
+  urbankart_analytics:
+    +schema: seeds
+    exchange_rates:
+      +column_types:
+        currency_code: varchar(10)
+        rate_to_usd: float
+        effective_date: date
 vars:
   default_currency: 'BRL'
   start_date: '2016-01-01'
