@@ -82,3 +82,15 @@ models:
         description: "price + freight_value. GMV building block."
         tests:
           - not_null
+      - name: ordered_at
+        description: "Timestamp when the order was placed."
+        tests:
+          - no_future_dates
+      - name: price
+        description: "Item price, excluding freight."
+        tests:
+          - positive_values
+      - name: freight_value
+        description: "Shipping cost for the item."
+        tests:
+          - positive_values    
