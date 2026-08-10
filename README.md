@@ -14,8 +14,8 @@
 | Phase 4 | dbt Init + Staging Layer | ✅ Complete |
 | Phase 5A | Intermediate Layer | ✅ Complete |
 | Phase 5B | Marts Layer (Star Schema) | ✅ Complete  |
-| Phase 6 | Advanced dbt (Incremental, Snapshots, Macros) | 🔄 In Progress |
-| Phase 7 | CI/CD (GitHub Actions) | ⏳ Planned |
+| Phase 6 | Advanced dbt (Incremental, Snapshots, Macros) |✅ Complete |
+| Phase 7 | CI/CD (GitHub Actions) | 🔄 In Progress |
 | Phase 8 | Power BI Dashboard | ⏳ Planned |
 
 ---
@@ -363,7 +363,7 @@ Merge to main
 |---|---|---|
 | `feature/staging-layer` | 9 staging models + tests + docs | ✅ Merged |
 | `feature/intermediate-layer` | 3 intermediate models | ✅ Merged |
-| `feature/marts-layer` | 6 mart models (dim + fct) | 🔄 In Progress |
+| `feature/marts-layer` | 6 mart models (dim + fct) | ✅ Merged |
 
 ### Commit Convention
 
@@ -397,7 +397,6 @@ refactor: code improvement, no behavior change
 
 ## Coming Next (Phases 6-8)
 
-- **Phase 6:** Incremental models (`fct_orders`), SCD Type 2 snapshot (`snp_sellers`), Jinja macros (`cents_to_currency`), seeds (`exchange_rates.csv`), custom tests, hooks, exposures
 - **Phase 7:** GitHub Actions CI/CD — automated `dbt run + dbt test` on every PR
 - **Phase 8:** Power BI dashboard — GMV, delivery SLA, seller scorecard, CX analysis
 
@@ -407,6 +406,6 @@ refactor: code improvement, no behavior change
 
 Built by **Sominath Avhad** — Senior Analytics Professional (5 years) transitioning to Analytics Engineering.
 
-**Connect:** [LinkedIn](https://linkedin.com/in/yourprofile) | [GitHub](https://github.com/sominathavhad26)
+**Connect:** [LinkedIn](https://linkedin.com/in/sominathavhad) | [GitHub](https://github.com/sominathavhad26)
 
 > *"This project simulates what I would build on Day 1 as an Analytics Engineer — requirements-first, tested, documented, and version-controlled."*
