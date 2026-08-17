@@ -1,0 +1,52 @@
+
+name: dbt CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'models/**'
+      - 'tests/**'
+      - 'macros/**'
+      - 'snapshots/**'
+      - 'dbt_project.yml'
+      - 'packages.yml'
+
+jobs:
+  dbt-test:
+    name: Run dbt Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt-snowflake
+        run: pip install dbt-snowflake==1.8.0
+
+      - name: Setup dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          echo "${{ secrets.DBT_PROFILES_YML }}" > ~/.dbt/profiles.yml
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: dbt debug
+        run: dbt debug
+
+      - name: Run dbt models
+        run: dbt run --select staging intermediate
+
+      - name: Run dbt tests
+        run: dbt test --select staging intermediate
+
+      - name: Check source freshness
+        run: dbt source freshness
+        continue-on-error: true
