@@ -1,4 +1,5 @@
 
+-- Testing CI pipeline trigger
 
 with source as (
     select * from {{ source('olist', 'ORDERS') }}
