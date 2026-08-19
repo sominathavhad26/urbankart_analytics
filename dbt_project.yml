@@ -59,4 +59,4 @@ models:
       finance:
         +schema: marts  
    
-        
+        # CI trigger test
