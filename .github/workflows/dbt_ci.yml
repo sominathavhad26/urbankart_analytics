@@ -1,5 +1,6 @@
 
 name: dbt CI Pipeline
+# Updated: version pinned to 1.11.0
 
 on:
   pull_request:
