@@ -1,0 +1,48 @@
+
+name: dbt CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  dbt-production-run:
+    name: Production dbt Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt-snowflake
+        run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.6
+
+      - name: Setup dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          echo "${{ secrets.DBT_PROFILES_YML }}" > ~/.dbt/profiles.yml
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Run ALL dbt models
+        run: dbt run
+
+      - name: Run ALL dbt tests
+        run: dbt test
+
+      - name: Run dbt snapshot
+        run: dbt snapshot
+
+      - name: Source freshness check
+        run: dbt source freshness
+        continue-on-error: true
+
+      - name: Generate dbt docs
+        run: dbt docs generate
